@@ -618,19 +618,6 @@ func NewLocalBackend(logf logger.Logf, logID logid.PublicID, sys *tsd.System, lo
 		}
 	}
 
-	// initialize Taildrive shares from saved state
-	fs, ok := b.sys.DriveForRemote.GetOK()
-	if ok {
-		currentShares := b.pm.prefs.DriveShares()
-		if currentShares.Len() > 0 {
-			var shares []*drive.Share
-			for _, share := range currentShares.All() {
-				shares = append(shares, share.AsStruct())
-			}
-			fs.SetShares(shares)
-		}
-	}
-
 	for name, newFn := range registeredExtensions {
 		ext, err := newFn(logf, sys)
 		if err != nil {
@@ -2469,6 +2456,19 @@ func (b *LocalBackend) Start(opts ipn.Options) error {
 		cc.Login(controlclient.LoginDefault)
 	}
 	b.stateMachineLockedOnEntry(unlock)
+
+	// initialize Taildrive shares from saved state
+	fs, ok := b.sys.DriveForRemote.GetOK()
+	if ok {
+		currentShares := b.pm.prefs.DriveShares()
+		if currentShares.Len() > 0 {
+			var shares []*drive.Share
+			for _, share := range currentShares.All() {
+				shares = append(shares, share.AsStruct())
+			}
+			fs.SetShares(shares)
+		}
+	}
 
 	return nil
 }
